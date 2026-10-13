@@ -5,7 +5,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PUBLIC_DIR = path.join(__dirname, 'public');
+const PUBLIC_DIR = __dirname;
 const PORT = process.env.PORT || 3000;
 
 // single shared game-state blob, kept in memory for the life of this process
