@@ -352,7 +352,8 @@ textarea{width:100%;height:50vh;background:var(--panel2);color:var(--text);borde
     <h2 class="eyebrow" style="margin-bottom:10px">Soru bankası</h2>
     <p style="font-size:12px;color:var(--mute);line-height:1.6;margin-bottom:12px">
       Her satır bir soru: <b>Kategori/liste | Soru | Cevap=puan; Cevap=puan; ... |</b><br>
-      Örn: <code>Köpek/liste | Köpeğini mutlu eden şeyler neler? | Yürüyüş=30; Oyun=20 |</code>
+      Örn: <code>Köpek/liste | Köpeğini mutlu eden şeyler neler? | Yürüyüş=30; Oyun=20 |</code><br>
+      Sıra önemli: ilk 10 satır Bölüm 1'e, sonraki 10 Bölüm 2'ye, son 10 Bölüm 3'e gider.
     </p>
     <textarea id="qArea" spellcheck="false"></textarea>
     <div class="c-actions" style="margin-top:12px">
@@ -369,15 +370,6 @@ const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlsAAAClCAYAAABrwjgx
 const PAW_SVG = `<svg viewBox="0 0 100 100" fill="currentColor"><ellipse cx="50" cy="66" rx="26" ry="20"/><ellipse cx="22" cy="34" rx="13" ry="16" transform="rotate(-18 22 34)"/><ellipse cx="42" cy="18" rx="13" ry="16"/><ellipse cx="62" cy="18" rx="13" ry="16"/><ellipse cx="80" cy="36" rx="13" ry="16" transform="rotate(18 80 36)"/></svg>`;
 const TROPHY_SVG = `<svg viewBox="0 0 100 120" fill="currentColor"><path d="M30 10h40v8a26 26 0 0 1-9 20l-2 2a22 22 0 0 1-18 0l-2-2a26 26 0 0 1-9-20v-8z"/><path d="M30 14h-12a4 4 0 0 0-4 4v4a16 16 0 0 0 16 16" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M70 14h12a4 4 0 0 1 4 4v4a16 16 0 0 1-16 16" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><rect x="45" y="40" width="10" height="18"/><path d="M34 66h32l-4 10H38z"/><rect x="28" y="76" width="44" height="9" rx="2.5"/></svg>`;
 const HEART_SVG = `<svg viewBox="0 0 100 100" fill="currentColor"><path d="M50 90C22 68 6 47 6 29A24 24 0 0 1 50 15 24 24 0 0 1 94 29C94 47 78 68 50 90Z"/></svg>`;
-const CAT_BADGE_META = {
-  'Köpek': {icon: PAW_SVG, label: 'Köpek'},
-  'Kedi': {icon: PAW_SVG, label: 'Kedi'},
-  'Ortak': {icon: HEART_SVG, label: 'Ortak'}
-};
-function catBadge(c){
-  const meta = CAT_BADGE_META[c] || {icon: HEART_SVG, label: c || 'Ortak'};
-  return `<div class="cat-badge">${meta.icon}<span>${esc(meta.label)}</span></div>`;
-}
 
 const DEFAULT_Q = `Köpek/liste | Köpeğini mutlu eden şeyler neler? | Yürüyüş=30; Oyun / top=25; Ödül=20; Sahibiyle vakit=15; Sevilmek=10 |
 Köpek/liste | Köpekler sahibini karşılarken neler yapar? | Kuyruk sallar=30; Zıplar=25; Havlar=20; Yalar=15; Etrafında koşar=10 |
@@ -796,7 +788,6 @@ function stageRenderGame(el){
       <div class="paw-bg"></div>
       ${showQ ? `
       <div class="s-meta"><span class="bar"></span><span class="timer ${timerOn?'':'hidden'} ${timerOn&&!S.paused&&timerSecs<=10?'low':''}" id="stageTimer">${timerOn?(S.paused?'⏸':timerSecs):''}</span></div>
-      ${catBadge(q.c)}
       <h2 class="s-q">${esc(q.q)}</h2>
       <div class="s-points"><span class="n">${q.p}</span><span class="l">Puan</span></div>
       <div class="board"><div class="lrows">${rowsHtml}</div>
@@ -853,8 +844,10 @@ function stageRenderFinal(el){
 /* ================= CONTROL LOGIC ================= */
 // Oyun bu akşam 3 kez oynanacak (Bölüm 1/2/3) — her bölüm, soru bankasının
 // farklı, çakışmayan bir diliminden geliyor, böylece aynı sorular tekrar gelmez.
-// Bölümler kategoriye göre ayrılmıyor (Köpek/Kedi/Ortak karışık dağıtılıyor) —
-// her bölüm, kategoriler arasında döngüsel olarak seçilmiş karışık bir settir.
+// Bölümler, "Soruları düzenle" kutusuna yazdığın SIRAYA göre eşit 3 parçaya
+// bölünüyor: ilk 10 satır Bölüm 1, sonraki 10 Bölüm 2, son 10 Bölüm 3 (30 soru
+// için). Köpek/kedi/ortak karışık olsun istiyorsan, satırları o sırayla karışık
+// yazman yeterli — bölümleme artık kategoriye bakmadan, direkt yazdığın sırayı izliyor.
 const PART_COUNT = 3;
 function partRanges(total){
   const base = Math.floor(total/PART_COUNT), extra = total%PART_COUNT;
@@ -862,33 +855,11 @@ function partRanges(total){
   for(let p=0;p<PART_COUNT;p++){ const size = base + (p<extra?1:0); ranges.push([start, start+size]); start += size; }
   return ranges;
 }
-// Orijinal indeksleri kategoriye göre gruplayıp round-robin sırayla karıştırır,
-// böylece art arda gelen indeksler (0,1,2...) artık aynı kategoriden gelmez —
-// sonra bu karışık diziyi PART_COUNT parçaya bölmek her bölüme her kategoriden
-// soru düşmesini sağlar.
-function interleaveByCategory(qs){
-  const groups = {}, catOrder = [];
-  qs.forEach((q,i)=>{
-    const key = (q && q.c) || 'Ortak';
-    if(!groups[key]){ groups[key]=[]; catOrder.push(key); }
-    groups[key].push(i);
-  });
-  const mixed = [];
-  let more = true, k = 0;
-  while(more){
-    more = false;
-    for(const key of catOrder){
-      if(groups[key][k] !== undefined){ mixed.push(groups[key][k]); more = true; }
-    }
-    k++;
-  }
-  return mixed;
-}
 function partIndices(qs, part){
   const p = Math.max(1, Math.min(PART_COUNT, part||1));
-  const mixed = interleaveByCategory(qs);
-  const r = partRanges(mixed.length)[p-1];
-  return mixed.slice(r[0], r[1]);
+  const seq = qs.map((_,i)=>i);
+  const r = partRanges(seq.length)[p-1];
+  return seq.slice(r[0], r[1]);
 }
 let introTimer = null;
 function startGame(){
@@ -1018,7 +989,7 @@ function controlSetupHtml(){
   </div>
   <div class="c-card">
     <h2>Bölüm</h2>
-    <p class="linkline" style="margin-bottom:8px">Oyun bu akşam 3 kez oynanacak — her bölümde farklı, karışık 10 soru çıkar (köpek/kedi/ortak karışık), önceki bölümün soruları tekrar gelmez.</p>
+    <p class="linkline" style="margin-bottom:8px">Oyun bu akşam 3 kez oynanacak — "Soruları düzenle" kutusuna yazdığın sıraya göre bölünür: ilk 10 satır Bölüm 1, sonraki 10 Bölüm 2, son 10 Bölüm 3 (30 soru için). Önceki bölümün soruları tekrar gelmez.</p>
     <div class="c-toggles">
       ${[1,2,3].map(p=>`<button class="chip ${G.part===p?'on':''}" data-act="setPart" data-arg="${p}">Bölüm ${p}</button>`).join('')}
     </div>
