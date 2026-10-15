@@ -1,4 +1,11 @@
-<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><title>VetFeud — Royal Canin</title>
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
+<title>VetFeud — Royal Canin</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Jost:wght@400;500;600;700&display=swap">
 <style>
 :root{
@@ -23,6 +30,20 @@ button{border:0;background:none;cursor:pointer;touch-action:manipulation;transit
 .role-solo #controlRoot{display:block;min-height:0}
 .role-solo .soloNote{display:block}
 .soloNote{display:none;background:#F6E6E4;border:1px solid var(--rule);color:var(--mute);font-size:12px;line-height:1.6;padding:10px 12px;margin-bottom:12px;border-radius:3px}
+#rolePick{display:none;position:fixed;inset:0;z-index:70;background:radial-gradient(90% 60% at 50% 0%,#FDEBE9 0%,#fff 65%);
+  flex-direction:column;align-items:center;justify-content:center;gap:3vh;padding:6vh 6vw;text-align:center}
+#rolePick .logo{height:clamp(44px,8vh,90px)}
+#rolePick h1{font-family:var(--serif);font-weight:400;font-size:clamp(28px,5vw,56px);letter-spacing:-.01em}
+#rolePick p{color:var(--mute);font-size:clamp(13px,1.4vw,17px);max-width:40ch;line-height:1.5}
+.pick-btns{display:flex;flex-direction:column;gap:14px;width:100%;max-width:360px}
+.pick-btn{display:block;width:100%;padding:20px 18px;border:2px solid var(--red);border-radius:6px;background:#fff;box-shadow:var(--shadow-sm);text-align:center}
+.pick-btn b{display:block;font-family:var(--serif);font-size:clamp(17px,2vw,22px);color:var(--red);letter-spacing:.02em;font-weight:400}
+.pick-btn span{display:block;margin-top:4px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700}
+.pick-btn:active{transform:scale(.98)}
+.pick-btn.ctrl{border-color:var(--red2)}
+.pick-btn.ctrl b{color:var(--red2)}
+.resetRoleBtn{flex:none;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700;border:1px solid var(--rule);border-radius:3px;padding:.5em .8em;background:#fff}
+.resetRoleBtn:hover{color:var(--red);border-color:var(--red)}
 .grain{position:fixed;inset:0;pointer-events:none;opacity:.025;z-index:50;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:45}
@@ -30,6 +51,13 @@ button{border:0;background:none;cursor:pointer;touch-action:manipulation;transit
 .flash.bad{background:radial-gradient(circle,transparent 30%,rgba(179,38,30,.5));animation:fl .6s}
 .flash.good{background:radial-gradient(circle,transparent 30%,rgba(226,35,26,.22));animation:fl .9s}
 @keyframes fl{0%{opacity:1}100%{opacity:0}}
+#bigIcon{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:46}
+#bigIcon .ic{width:clamp(110px,16vw,240px);height:clamp(110px,16vw,240px);border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:clamp(56px,9vw,130px);font-weight:900;color:#fff;opacity:0;transform:scale(.4);box-shadow:0 20px 60px -10px rgba(0,0,0,.45)}
+#bigIcon .ic.show{animation:bigIconPop 1.1s cubic-bezier(.2,1.4,.4,1) both}
+#bigIcon .ic.good{background:var(--ok)}
+#bigIcon .ic.bad{background:var(--red2)}
+@keyframes bigIconPop{0%{opacity:0;transform:scale(.3)}15%{opacity:1;transform:scale(1.08)}25%{transform:scale(1)}78%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.15)}}
 .eyebrow{font-size:clamp(11px,1.05vw,16px);letter-spacing:.3em;text-transform:uppercase;color:var(--mute);font-weight:700}
 .eyebrow.red{color:var(--red)}
 .logo{height:40px;width:auto;display:block}
@@ -150,6 +178,8 @@ button{border:0;background:none;cursor:pointer;touch-action:manipulation;transit
 .btn-ghost:hover{border-color:var(--red);color:var(--red)}
 .btn-ok{background:var(--ok);color:#fff}
 .btn-bad{background:#fff;border:1px solid var(--red);color:var(--red)}
+.btn-wrong{background:var(--red2);color:#fff;box-shadow:var(--shadow-red)}
+.btn-wrong:active{transform:scale(.98)}
 .pickbtn:hover{background:rgba(226,35,26,.06)}
 .linkline{font-size:12px;color:var(--mute);margin-top:4px}
 .linkbox{font:12px ui-monospace,Menlo,monospace;background:var(--panel2);border:1px solid var(--rule);padding:8px 10px;word-break:break-all;user-select:all;margin-top:6px}
@@ -212,6 +242,18 @@ textarea{width:100%;height:50vh;background:var(--panel2);color:var(--text);borde
 <div class="grain"></div>
 <canvas id="confetti"></canvas>
 <div class="flash" id="flash"></div>
+<div id="bigIcon"></div>
+
+<!-- ============ ROLE PICKER (shown once per device, until a screen is chosen) ============ -->
+<div id="rolePick">
+  <img class="logo" id="pickLogo" alt="Royal Canin">
+  <h1>VetFeud</h1>
+  <p>Bu cihazda hangi ekranı kullanacaksınız? Seçimin bu cihazda hatırlanacak, bir daha sorulmayacak.</p>
+  <div class="pick-btns">
+    <button class="pick-btn" onclick="pickRole('stage')"><b>Sahne Ekranı</b><span>Projeksiyon / büyük ekran</span></button>
+    <button class="pick-btn ctrl" onclick="pickRole('control')"><b>Kontrol Paneli</b><span>Reji / moderasyon</span></button>
+  </div>
+</div>
 
 <!-- ============ STAGE ============ -->
 <div id="stageRoot" class="root">
@@ -223,6 +265,7 @@ textarea{width:100%;height:50vh;background:var(--panel2);color:var(--text);borde
       <svg class="fs-i-exp" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
       <svg class="fs-i-comp" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v4a1 1 0 0 1-1 1H4M15 3v4a1 1 0 0 0 1 1h4M9 21v-4a1 1 0 0 0-1-1H4M15 21v-4a1 1 0 0 1 1-1h4"/></svg>
     </button>
+    <button class="resetRoleBtn" onclick="resetRole()" title="Bu cihazın ekran seçimini sıfırla">Ekranı değiştir</button>
   </div>
   <div id="stageBody" style="flex:1;display:flex;flex-direction:column;min-height:0"></div>
 </div>
@@ -233,6 +276,7 @@ textarea{width:100%;height:50vh;background:var(--panel2);color:var(--text);borde
     <div class="c-top">
       <div class="c-top" style="gap:10px;padding:0"><img class="logo" id="controlLogo" alt="Royal Canin" style="height:28px"><span style="font-family:var(--serif);font-size:17px" id="controlTitle">VetFeud — Reji</span></div>
       <div class="tag" id="controlConn"><span class="dot"></span> Bağlanıyor</div>
+      <button class="resetRoleBtn" onclick="resetRole()" title="Bu cihazın ekran seçimini sıfırla">Ekranı değiştir</button>
     </div>
     <div id="controlBody"></div>
   </div>
@@ -283,7 +327,12 @@ Ortak/liste | Evcil hayvanı olan bir evde mutlaka bulunan eşyalar neler? | Mam
 Ortak/liste | Evcil hayvan sahibi olmanın en güzel yanları neler? | Koşulsuz sevgi=30; Yalnız hissettirmemesi=25; Neşe / eğlence=20; Hareket / yürüyüş=15; Stresi azaltması=10 |
 Ortak/liste | Eve yeni bir yavru geldiğinde ilk alınanlar neler? | Mama=30; Mama ve su kabı=25; Yatak=20; Oyuncak=15; Veteriner kontrolü=10 |
 Ortak/liste | Evcil hayvanınla en çok neler yaparsın? | Oyun oynamak=30; Sevmek / okşamak=25; Fotoğraf çekmek=20; Yürüyüşe çıkmak=15; Birlikte uyumak=10 |
-Ortak/liste | Bir evcil hayvan sahibinin telefonunda en çok ne olur? | Hayvan fotoğrafı/videosu=30; Veteriner randevu notu=25; Mama markası arama geçmişi=20; Hayvan hesapları takibi=15; Hatırlatıcılar=10 |`;
+Ortak/liste | Bir evcil hayvan sahibinin telefonunda en çok ne olur? | Hayvan fotoğrafı/videosu=30; Veteriner randevu notu=25; Mama markası arama geçmişi=20; Hayvan hesapları takibi=15; Hatırlatıcılar=10 |
+Ortak/liste | Evcil hayvan sahiplerinin veterinere en çok sorduğu sorular neler? | Aşı takvimi=30; Beslenme / mama önerisi=25; Kilo / sağlık kontrolü=20; Davranış sorunları=15; Parazit / tedavi=10 |
+Ortak/liste | Bir evcil hayvanın doğum gününde neler yapılır? | Özel mama / ödül=30; Fotoğraf çekimi=25; Yeni oyuncak hediye=20; Köpek/kedi pastası=15; Arkadaşlarla kutlama=10 |
+Ortak/liste | Evcil hayvan sahipleri sosyal medyada en çok neyi paylaşır? | Günlük fotoğraflar=30; Komik videolar=25; Yeni numaraları=20; Seyahat/gezinti anları=15; Kostüm / kıyafet paylaşımı=10 |
+Ortak/liste | Bir evcil hayvanla seyahate çıkarken yanına neler alınır? | Mama ve kabı=30; Taşıma çantası / kafes=25; Tasma / gezinti seti=20; Sevdiği oyuncak=15; Sağlık / aşı belgeleri=10 |
+Ortak/liste | Evcil hayvan sahibi olmanın getirdiği en büyük sorumluluklar neler? | Düzenli beslenme=30; Veteriner / sağlık takibi=25; Günlük bakım / temizlik=20; Eğitim / sosyalleşme=15; Zaman ayırmak=10 |`;
 
 function esc(s){ return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
 
@@ -308,10 +357,41 @@ const COLORS = ['#E2231A','#7A0C12'];
 const ROMAN = ['I','II'];
 
 /* ================= ROLE & STATE ================= */
-const ROLE = 'control';
-document.body.classList.add('role-'+ROLE);
+const VIEW_PARAM = new URLSearchParams(location.search).get('view');
+const ROLE_KEY = 'vetfeud_role_v2';
+function readStoredRole(){
+  try{ const v = localStorage.getItem(ROLE_KEY); return (v==='control'||v==='stage'||v==='solo') ? v : null; }
+  catch(e){ return null; }
+}
+function writeStoredRole(v){ try{ localStorage.setItem(ROLE_KEY, v); }catch(e){} }
+function resetRole(){ try{ localStorage.removeItem(ROLE_KEY); }catch(e){} location.href = location.pathname; }
+// Some hosting contexts (notably the claude.ai artifact preview) don't reliably
+// carry a shared link's query string through to this page's own location, so a
+// ?view= URL param alone can silently resolve to the wrong screen. To make the
+// combined view IMPOSSIBLE to land on by accident, we never silently default to
+// anything: if the URL doesn't say, and this device hasn't chosen before, we ask
+// ONCE (role picker screen) which screen this device should always show, then
+// remember that choice on this device — every later visit on this same device
+// goes straight to that screen, no picker, no query string needed.
+const URL_ROLE = (VIEW_PARAM==='control'||VIEW_PARAM==='stage'||VIEW_PARAM==='solo') ? VIEW_PARAM : null;
+let ROLE = 'control';
 document.querySelectorAll('.logo').forEach(i=>i.src=LOGO);
-if(ROLE==='solo'){ const ctEl=document.getElementById('controlTitle'); if(ctEl) ctEl.textContent='VetFeud — Tek Cihaz'; }
+function pickRole(role){
+  ROLE = role;
+  writeStoredRole(role);
+  document.body.classList.remove('role-stage','role-control','role-solo');
+  document.body.classList.add('role-'+role);
+  if(role==='solo'){ const ctEl=document.getElementById('controlTitle'); if(ctEl) ctEl.textContent='VetFeud — Tek Cihaz'; }
+  const rp = document.getElementById('rolePick'); if(rp) rp.style.display='none';
+  initCapabilities();
+  if(role==='control'){ G = defaultState(); controlRender(); }
+}
+if(ROLE){
+  document.body.classList.add('role-'+ROLE);
+  if(ROLE==='solo'){ const ctEl=document.getElementById('controlTitle'); if(ctEl) ctEl.textContent='VetFeud — Tek Cihaz'; }
+} else {
+  const rp = document.getElementById('rolePick'); if(rp) rp.style.display='flex';
+}
 
 const DOC_PATH = 'game/state';
 let db=null, canWrite=null, controlInited=false, dbUnavailable=false;
@@ -325,11 +405,13 @@ function defaultState(){
     names:['Pati Ekibi','Kuyruk Ekibi'],
     opts:{shuffle:true, penalty:false},
     bankText: DEFAULT_Q,
+    part: 1,
     order:[], idx:-1,
     phase:'idle', buzzer:null, locked:[], revealed:false, won:null,
-    rowsHit:[], rowBy:{},
+    rowsHit:[], rowBy:{}, wrongCount:0,
     scores:[0,0],
     deadline:null, timedOut:false,
+    paused:false, pausedRemain:0,
     buzzTime:0, updatedAt:0
   };
 }
@@ -403,8 +485,16 @@ function subscribe(){
     } else {
       if(!controlInited){
         controlInited = true;
+        // Never auto-start a game the moment control connects — not even on a
+        // first-ever connect. A connection/reconnect can read an empty snapshot
+        // transiently (a slow request, or a server that lost its in-memory state
+        // on a restart) and that must never be treated as "safe to shuffle a
+        // fresh game" — that would silently throw away whatever was actually in
+        // progress and swap in different questions with no warning. Always show
+        // exactly what's really there; starting a game always requires an
+        // explicit tap on "Yarışmayı Başlat".
         G = data ? Object.assign(defaultState(), data) : defaultState();
-        if(G.screen==='setup'){ startGame(); } else { controlRender(); }
+        controlRender();
       }
     }
   }, err=>{ setConn(false,true); });
@@ -419,12 +509,17 @@ async function push(){
   catch(e){ flashWriteError(); }
 }
 
-function flashWriteError(){
+function flashWriteError(){ toast('Kaydedilemedi — bağlantını kontrol et ve tekrar dene.'); }
+// Native confirm()/alert() dialogs are unreliable here (sandboxed hosting contexts,
+// such as the claude.ai artifact preview, can silently block them, which makes a
+// button that waits on confirm() look broken with no error shown). This renders
+// the same kind of message inline instead, so it always shows.
+function toast(msg){
   const el = document.getElementById('controlBody');
   if(!el) return;
   const w = document.createElement('div');
   w.className='banner-warn'; w.style.marginBottom='10px';
-  w.textContent='Kaydedilemedi — bağlantını kontrol et ve tekrar dene.';
+  w.textContent=msg;
   el.prepend(w);
   setTimeout(()=>w.remove(),3500);
 }
@@ -461,6 +556,14 @@ function loopCv(){
   raf = parts.length ? requestAnimationFrame(loopCv) : (cx.clearRect(0,0,cv.width,cv.height),null);
 }
 function flash(k){ const f=document.getElementById('flash'); f.className='flash'; void f.offsetWidth; f.className='flash '+k; }
+function bigIcon(kind){
+  const el = document.getElementById('bigIcon');
+  if(!el) return;
+  el.innerHTML = `<div class="ic ${kind}">${kind==='good'?'✓':'✕'}</div>`;
+  const ic = el.firstElementChild;
+  void ic.offsetWidth;
+  ic.classList.add('show');
+}
 
 /* ================= FULLSCREEN ================= */
 function toggleFullscreen(){
@@ -518,13 +621,13 @@ function stageRenderGame(el){
   if(S.phase==='answering' && S.buzzer!=null){ bannerOn=true; bc=COLORS[S.buzzer]; bannerHtml=`<div class="who">${esc(S.names[S.buzzer]||'Ekip')}</div><div class="sub">söz aldı</div>`; }
   else if(S.phase==='resolved'){ bannerOn=true; bc = S.won!=null? COLORS[S.won] : '#2A0709'; bannerHtml = S.won!=null ? `<div class="who">${esc(S.names[S.won]||'Ekip')}</div><div class="sub">doğru bildi</div>` : S.timedOut ? `<div class="who">Süre doldu</div><div class="sub">&nbsp;</div>` : `<div class="who">Liste tamamlandı</div><div class="sub">&nbsp;</div>`; }
 
-  const timerOn = showQ && S.phase==='open' && S.deadline;
-  const timerSecs = timerOn ? Math.max(0, Math.ceil((S.deadline-Date.now())/1000)) : null;
+  const timerOn = showQ && S.phase==='open' && (S.deadline || S.paused);
+  const timerSecs = S.paused ? Math.max(0, Math.ceil((S.pausedRemain||0)/1000)) : (timerOn ? Math.max(0, Math.ceil((S.deadline-Date.now())/1000)) : null);
 
   el.innerHTML = `
     <div class="s-stage">
       ${showQ ? `
-      <div class="s-meta"><span class="bar"></span><span class="timer ${timerOn?'':'hidden'} ${timerOn&&timerSecs<=10?'low':''}" id="stageTimer">${timerOn?timerSecs:''}</span></div>
+      <div class="s-meta"><span class="bar"></span><span class="timer ${timerOn?'':'hidden'} ${timerOn&&!S.paused&&timerSecs<=10?'low':''}" id="stageTimer">${timerOn?(S.paused?'⏸':timerSecs):''}</span></div>
       <h2 class="s-q">${esc(q.q)}</h2>
       <div class="s-points"><span class="n">${q.p}</span><span class="l">Puan</span></div>
       <div class="board"><div class="lrows">${rowsHtml}</div>
@@ -541,16 +644,17 @@ function stageRenderGame(el){
       }).join(''); })()}
     </div>`;
   if(prevS) S.names.forEach((_,i)=>{ if(prevS.scores && prevS.scores[i]!==S.scores[i]){ const el2=document.getElementById('stageSc'+i); if(el2){ el2.classList.remove('bump'); void el2.offsetWidth; el2.classList.add('bump'); } } });
-  const prog = document.getElementById('stageProgress'); if(prog) prog.textContent = `SORU ${String(S.idx+1).padStart(2,'0')} / ${S.order.length}`;
+  const prog = document.getElementById('stageProgress'); if(prog) prog.textContent = `BÖLÜM ${S.part||1} · SORU ${String(S.idx+1).padStart(2,'0')} / ${S.order.length}`;
 
-  // transitions: play sfx/confetti/flash once per change
+  // transitions: play sfx/confetti/flash/bigIcon once per change
   if(prevS){
-    if((prevS.rowsHit||[]).length < (S.rowsHit||[]).length){ sfx.ok(); flash('good'); }
+    if((prevS.rowsHit||[]).length < (S.rowsHit||[]).length){ sfx.ok(); flash('good'); bigIcon('good'); }
+    if((prevS.wrongCount||0) < (S.wrongCount||0)){ sfx.no(); flash('bad'); bigIcon('bad'); }
     if(prevS.phase!=='resolved' && S.phase==='resolved'){
       const totalRows = q.rows.length;
       const hitCount = (S.rowsHit||[]).length;
       if(hitCount >= totalRows){ flash('good'); burst(); }
-      else { sfx.no(); flash('bad'); }
+      else { sfx.no(); flash('bad'); bigIcon('bad'); }
     }
   }
 }
@@ -569,10 +673,35 @@ function stageRenderFinal(el){
 }
 
 /* ================= CONTROL LOGIC ================= */
+// Oyun bu akşam 3 kez oynanacak (Bölüm 1/2/3) — her bölüm, soru bankasının
+// farklı, çakışmayan bir diliminden geliyor, böylece aynı sorular tekrar çıkmaz.
+const PART_COUNT = 3;
+function partRanges(total){
+  const base = Math.floor(total/PART_COUNT), extra = total%PART_COUNT;
+  let start=0, ranges=[];
+  for(let p=0;p<PART_COUNT;p++){ const size = base + (p<extra?1:0); ranges.push([start, start+size]); start += size; }
+  return ranges;
+}
+function partIndices(qsLen, part){
+  const p = Math.max(1, Math.min(PART_COUNT, part||1));
+  const r = partRanges(qsLen)[p-1];
+  const idxs=[]; for(let i=r[0]; i<r[1]; i++) idxs.push(i);
+  return idxs;
+}
+function partLabel(p){
+  try{
+    const qs = parseQ(G.bankText);
+    const idxs = partIndices(qs.length, p);
+    if(!idxs.length) return '';
+    const cats = new Set(idxs.map(i=>qs[i] && qs[i].c));
+    return cats.size===1 ? ' · '+[...cats][0] : '';
+  }catch(e){ return ''; }
+}
 function startGame(){
   let qs = parseQ(G.bankText);
-  if(!qs.length){ alert('Soru bulunamadı.'); return; }
-  let order = qs.map((_,i)=>i);
+  if(!qs.length){ toast('Soru bulunamadı.'); return; }
+  let order = partIndices(qs.length, G.part||1);
+  if(!order.length) order = qs.map((_,i)=>i);
   if(G.opts.shuffle) order = order.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
   G.order=order; G.idx=-1; G.scores=[0,0]; G.screen='game';
   nextQ(true);
@@ -582,7 +711,7 @@ function nextQ(skipPush){
   G.idx++;
   if(G.idx>=G.order.length){ finish(); return; }
   G.phase='open'; G.buzzer=null; G.locked=[]; G.revealed=false; G.won=null; G.rowsHit=[]; G.rowBy={}; G.buzzTime=0;
-  G.deadline = Date.now() + QUESTION_SECONDS*1000; G.timedOut=false;
+  G.deadline = Date.now() + QUESTION_SECONDS*1000; G.timedOut=false; G.paused=false; G.pausedRemain=0;
   controlRender(); if(!skipPush) push(); else push();
 }
 function timeUp(){
@@ -606,12 +735,42 @@ function hitRow(k, team){
   sfx.ok();
   G.scores[team]+=q.rows[k].p; G.rowsHit=[...(G.rowsHit||[]),k]; G.rowBy=Object.assign({},G.rowBy,{[k]:team});
   if(G.rowsHit.length>=q.rows.length){ G.revealed=true; G.phase='resolved'; G.deadline=null; }
+  else if(G.phase==='open'){ G.deadline = Date.now() + QUESTION_SECONDS*1000; G.paused=false; G.pausedRemain=0; }
+  controlRender(); push();
+}
+function markWrong(){
+  if(!G || G.phase!=='open') return;
+  G.wrongCount = (G.wrongCount||0)+1;
+  G.deadline = Date.now() + QUESTION_SECONDS*1000; G.paused=false;
+  controlRender(); push();
+}
+// Pause/resume the 60-second clock — for the host doing banter/goygoy between
+// answers, so the round doesn't quietly time out while nobody's answering.
+function togglePause(){
+  if(!G || G.phase!=='open' || !G.deadline) return;
+  if(G.paused){
+    G.deadline = Date.now() + (G.pausedRemain||0);
+    G.paused = false; G.pausedRemain = 0;
+  } else {
+    G.pausedRemain = Math.max(0, G.deadline - Date.now());
+    G.paused = true;
+  }
   controlRender(); push();
 }
 function finish(){ G.screen='final'; G.deadline=null; controlRender(); push(); }
 function adjustScore(i,d){ G.scores[i]=Math.max(0,G.scores[i]+d); controlRender(); push(); }
 function skipQ(){ nextQ(); }
-function restart(){ Object.assign(G, defaultState(), {bankText:G.bankText, names:G.names, opts:G.opts}); controlRender(); push(); }
+function restart(){ Object.assign(G, defaultState(), {bankText:G.bankText, names:G.names, opts:G.opts}); restartArmed=false; controlRender(); push(); }
+// Two-tap confirm instead of a native confirm() dialog — sandboxed hosting
+// contexts (e.g. the claude.ai artifact preview) can silently block confirm(),
+// which makes the restart button look broken with no error shown at all.
+let restartArmed = false, restartArmedTimer = null;
+function requestRestart(){
+  if(restartArmed){ clearTimeout(restartArmedTimer); restart(); return; }
+  restartArmed = true; controlRender();
+  clearTimeout(restartArmedTimer);
+  restartArmedTimer = setTimeout(()=>{ restartArmed=false; controlRender(); }, 4000);
+}
 
 /* ================= CONTROL RENDER ================= */
 function controlRender(){
@@ -651,6 +810,13 @@ function controlSetupHtml(){
       <button class="chip ${G.opts.penalty?'on':''}" data-act="toggleOpt" data-arg="penalty">Yanlışta puan kaybı</button>
     </div>
   </div>
+  <div class="c-card">
+    <h2>Bölüm</h2>
+    <p class="linkline" style="margin-bottom:8px">Oyun bu akşam 3 kez oynanacak — her bölümde farklı 10 soru çıkar, önceki bölümün soruları tekrar gelmez.</p>
+    <div class="c-toggles">
+      ${[1,2,3].map(p=>`<button class="chip ${G.part===p?'on':''}" data-act="setPart" data-arg="${p}">Bölüm ${p}${partLabel(p)}</button>`).join('')}
+    </div>
+  </div>
   <button class="btn btn-primary" data-act="start">Yarışmayı Başlat</button>
   <button class="btn btn-ghost" data-act="openEdit">Soruları düzenle (${parseQ(G.bankText).length} soru)</button>
   <div class="c-card">
@@ -668,7 +834,7 @@ function controlFinalHtml(){
     <h2>Yarışma bitti</h2>
     ${order.map((i,r)=>`<div class="c-field"><b>${r+1}</b><span style="flex:1;font-family:var(--serif)">${esc(G.names[i]||'Ekip '+(i+1))}</span><span style="font-family:var(--serif);font-size:20px">${G.scores[i]}</span></div>`).join('')}
   </div>
-  <button class="btn btn-primary" data-act="restart">Yeni Yarışma</button>`;
+  <button class="btn ${restartArmed?'btn-wrong':'btn-primary'}" data-act="restart">${restartArmed?'Emin misin? Tekrar dokun — skorlar sıfırlanır':'Yeni Yarışma'}</button>`;
 }
 
 function controlGameHtml(){
@@ -698,16 +864,18 @@ function controlGameHtml(){
   }).join('');
 
   const actions = [];
+  if(ph==='open') actions.push(`<button class="btn btn-wrong wide" data-act="markWrong">✕ Yanlış Cevap</button>`);
+  if(ph==='open') actions.push(`<button class="btn ${G.paused?'btn-primary':'btn-ghost'} wide" data-act="togglePause">${G.paused?'▶ Süreyi Başlat':'⏸ Süreyi Duraklat'}</button>`);
   if(!G.revealed) actions.push(`<button class="btn btn-ghost" data-act="reveal">Cevabı Göster</button>`);
   actions.push(`<button class="btn btn-bad" data-act="none">${(G.rowsHit||[]).length?'Listeyi Bitir':'Kimse Bilemedi'}</button>`);
   if(ph==='resolved') actions.push(`<button class="btn btn-primary wide" data-act="next">${G.idx>=G.order.length-1?'Sonucu Göster ▸':'Sonraki Soru ▸'}</button>`);
 
-  const timerOn = ph==='open' && G.deadline;
-  const timerSecs = timerOn ? Math.max(0, Math.ceil((G.deadline-Date.now())/1000)) : null;
+  const timerOn = ph==='open' && (G.deadline || G.paused);
+  const timerSecs = G.paused ? Math.max(0, Math.ceil((G.pausedRemain||0)/1000)) : (timerOn ? Math.max(0, Math.ceil((G.deadline-Date.now())/1000)) : null);
 
   return `
   <div class="c-card c-qcard">
-    <div class="c-qmeta"><span>${esc(q.c)} · Liste</span><span>${q.p} puan</span><span>Soru ${G.idx+1}/${G.order.length}</span>${timerOn?`<span id="controlTimer" class="${timerSecs<=10?'low':''}">${timerSecs} sn</span>`:''}</div>
+    <div class="c-qmeta"><span>Bölüm ${G.part||1}</span><span>${esc(q.c)} · Liste</span><span>${q.p} puan</span><span>Soru ${G.idx+1}/${G.order.length}</span>${timerOn?`<span id="controlTimer" class="${!G.paused&&timerSecs<=10?'low':''}">${G.paused?'⏸ ':''}${timerSecs} sn</span>`:''}</div>
     <div class="c-qtext">${esc(q.q)}</div>
     <div class="eyebrow red" style="margin:10px 0 4px">Doğru cevabı veren ekibi seç</div>
     <div class="c-rows">${rowsHtml}</div>
@@ -724,7 +892,7 @@ function controlGameHtml(){
     <button class="btn btn-ghost" data-act="skip">Soruyu atla</button>
     <button class="btn btn-ghost" data-act="openEdit">Soruları düzenle</button>
     <button class="btn btn-ghost" data-act="finishNow">Yarışmayı bitir</button>
-    <button class="btn btn-ghost" data-act="restart">Baştan başla</button>
+    <button class="btn ${restartArmed?'btn-wrong':'btn-ghost'}" data-act="restart">${restartArmed?'Emin misin? Tekrar dokun':'Baştan başla'}</button>
   </div>`;
 }
 
@@ -747,6 +915,7 @@ document.body.addEventListener('click', e=>{
   const act = b.getAttribute('data-act');
   const arg = b.getAttribute('data-arg');
   if(act==='toggleOpt'){ G.opts[arg]=!G.opts[arg]; controlRender(); }
+  else if(act==='setPart'){ G.part=+arg; controlRender(); push(); }
   else if(act==='start') startGame();
   else if(act==='showQ') showQ();
   else if(act==='buzz') buzz(+arg);
@@ -757,19 +926,21 @@ document.body.addEventListener('click', e=>{
   else if(act==='next') nextQ();
   else if(act==='skip') skipQ();
   else if(act==='finishNow') finish();
-  else if(act==='restart'){ if(confirm('Yarışma baştan başlasın mı? Skorlar sıfırlanır.')) restart(); }
+  else if(act==='restart') requestRestart();
   else if(act==='adj'){ const [i,d]=arg.split(':').map(Number); adjustScore(i,d); }
   else if(act==='hitRow'){ const [k,team]=arg.split(':').map(Number); hitRow(k,team); }
+  else if(act==='markWrong') markWrong();
+  else if(act==='togglePause') togglePause();
   else if(act==='openEdit'){ document.getElementById('qArea').value=G.bankText; document.getElementById('editOv').classList.add('on'); }
   else if(act==='closeEdit'){ document.getElementById('editOv').classList.remove('on'); }
-  else if(act==='saveQ'){ const v=document.getElementById('qArea').value; if(!parseQ(v).length){ alert('Geçerli soru bulunamadı.'); return; } G.bankText=v; document.getElementById('editOv').classList.remove('on'); controlRender(); push(); }
+  else if(act==='saveQ'){ const v=document.getElementById('qArea').value; if(!parseQ(v).length){ toast('Geçerli soru bulunamadı.'); return; } G.bankText=v; document.getElementById('editOv').classList.remove('on'); controlRender(); push(); }
   else if(act==='resetQ'){ document.getElementById('qArea').value=DEFAULT_Q; }
 });
 
 /* ================= CLOCK ================= */
 function tick(){
   if(ROLE==='stage' || ROLE==='solo'){
-    if(S && S.phase==='open' && S.deadline){
+    if(S && S.phase==='open' && S.deadline && !S.paused){
       const el = document.getElementById('stageTimer');
       if(el){
         const secs = Math.max(0, Math.ceil((S.deadline-Date.now())/1000));
@@ -781,6 +952,7 @@ function tick(){
   }
   if(ROLE==='control' || ROLE==='solo'){
     if(!G || G.screen!=='game' || G.phase!=='open' || !G.deadline) return;
+    if(G.paused) return; // frozen — controlRender() already shows the held value
     const remain = G.deadline - Date.now();
     const secs = Math.max(0, Math.ceil(remain/1000));
     const tEl = document.getElementById('controlTimer');
@@ -789,12 +961,22 @@ function tick(){
   }
 }
 setInterval(tick, 250);
+// A backgrounded/locked phone throttles setInterval, so a 60s timeout can sit
+// unnoticed until the tab is foregrounded again. Force an immediate check the
+// moment that happens, instead of waiting for the next (possibly also
+// throttled) 250ms tick.
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) tick(); });
 
 /* ================= BOOT ================= */
-initCapabilities();
-if(ROLE==='control'){
-  // render a local-only placeholder until the first snapshot arrives
-  G = defaultState(); controlRender();
+if(ROLE){
+  initCapabilities();
+  if(ROLE==='control'){
+    // render a local-only placeholder until the first snapshot arrives
+    G = defaultState(); controlRender();
+  }
 }
+// else: nothing boots yet — waiting for a tap on the role-picker screen (pickRole() above)
 </script>
-</body></html>
+
+</body>
+</html>

@@ -8,8 +8,26 @@ const path = require('path');
 const PUBLIC_DIR = __dirname;
 const PORT = process.env.PORT || 3000;
 
-// single shared game-state blob, kept in memory for the life of this process
+// Shared game-state blob. Kept in memory for speed, but also written to disk
+// on every update and reloaded on boot — a process restart (crash, redeploy,
+// a free-tier host spinning the dyno back up) must never silently wipe an
+// in-progress game and make a reconnecting control screen look "stuck" or
+// jump to a different question. (Note: some free hosting tiers also wipe the
+// local disk itself on a restart/redeploy, not just memory — this covers the
+// common case of an in-process restart, but isn't a substitute for an always-on
+// plan if that's a risk for the actual event.)
+const STATE_FILE = path.join(__dirname, '.state.json');
 let state = { data: null, updatedAt: 0 };
+try {
+  if (fs.existsSync(STATE_FILE)) {
+    const loaded = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+    if (loaded && typeof loaded === 'object') state = loaded;
+  }
+} catch (e) { /* corrupt or missing — start fresh rather than crash */ }
+
+function persistState() {
+  fs.writeFile(STATE_FILE, JSON.stringify(state), () => {});
+}
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -64,6 +82,7 @@ const server = http.createServer(async (req, res) => {
         const body = await readBody(req);
         state.data = body;
         state.updatedAt = Date.now();
+        persistState();
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
         res.end(JSON.stringify({ ok: true }));
       } catch (e) {
@@ -74,8 +93,13 @@ const server = http.createServer(async (req, res) => {
   }
 
   // friendly clean URLs
-  if (pathname === '/sahne') { sendFile(res, path.join(PUBLIC_DIR, 'sahne.html')); return; }
+  // root "/" intentionally serves the STAGE-ONLY screen (never the combined
+  // single-device view), so the bare site link can never accidentally show
+  // the control panel underneath the game screen.
+  if (pathname === '/' || pathname === '/sahne') { sendFile(res, path.join(PUBLIC_DIR, 'sahne.html')); return; }
   if (pathname === '/kontrol') { sendFile(res, path.join(PUBLIC_DIR, 'kontrol.html')); return; }
+  // combined single-device view kept available at /tek-cihaz as a fallback, not as the default
+  if (pathname === '/tek-cihaz') { sendFile(res, path.join(PUBLIC_DIR, 'index.html')); return; }
 
   // static files
   let rel = pathname === '/' ? '/index.html' : pathname;
