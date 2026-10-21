@@ -571,7 +571,7 @@ function remoteDb(){
             if(typeof setConn==='function') setConn(true, false, changed);
             if(changed){ lastStr = str; cb({exists: !!j.data, data: ()=>j.data}); }
           }catch(e){ if(errCb) errCb(e); }
-          if(!stopped) setTimeout(poll, 400);
+          if(!stopped) setTimeout(poll, 200);
         }
         poll();
         return ()=>{ stopped = true; };
@@ -680,9 +680,25 @@ function toast(msg){
 
 /* ================= SOUND & FX (stage) ================= */
 let AC=null;
+// Buzzer/ok/win sounds are synthesized with Web Audio. Browsers (Chrome
+// especially) silently SUSPEND an AudioContext after it's gone a while
+// without producing sound -- a suspended context drops every scheduled note
+// with no error and no sound. "Doğru cevap" fires often (every açılan satır),
+// so it accidentally keeps the context alive; "yanlış cevap" fires rarely, so
+// it was the one most likely to land on an already-suspended context (sound
+// silently missing) or to fire just as the context was waking back up
+// (audible as "late"). ensureAC() fixes this at the source: always resume()
+// before scheduling anything, plus a periodic keep-alive in tick() and a
+// resume-on-any-interaction/visibility listener so the context is rarely
+// even suspended by the time a sound is actually needed.
+function ensureAC(){
+  AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+  if(AC.state==='suspended'){ AC.resume().catch(()=>{}); }
+  return AC;
+}
 function tone(f,d,type='sine',v=.18,when=0,slide){
   try{
-    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    AC = ensureAC();
     const t=AC.currentTime+when,o=AC.createOscillator(),g=AC.createGain();
     o.type=type;o.frequency.setValueAtTime(f,t);
     if(slide) o.frequency.exponentialRampToValueAtTime(slide,t+d);
@@ -696,7 +712,7 @@ function tone(f,d,type='sine',v=.18,when=0,slide){
 // a classic game-show "wrong buzzer" timbre.
 function wrongBuzz(){
   try{
-    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    AC = ensureAC();
     const t0 = AC.currentTime;
     const o1 = AC.createOscillator(), o2 = AC.createOscillator(), g = AC.createGain();
     o1.type='sawtooth'; o2.type='square';
@@ -718,6 +734,12 @@ const sfx = {
   no(){ wrongBuzz(); },
   win(){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,.5,'triangle',.22,i*.1)); tone(1568,.7,'triangle',.2,.55); tone(1976,.8,'triangle',.16,.68); }
 };
+// Any tap/key/scroll anywhere on the page satisfies the "user gesture"
+// browsers sometimes require before audio is allowed at all, and is also the
+// cheapest moment to wake a context that got suspended while idle.
+['pointerdown','keydown','touchstart'].forEach(evt=>{
+  document.addEventListener(evt, ()=>{ if(AC && AC.state==='suspended') AC.resume().catch(()=>{}); }, {passive:true});
+});
 const cv=document.getElementById('confetti'), cx=cv.getContext('2d'); let parts=[], raf=null;
 function sizeCv(){ cv.width=innerWidth; cv.height=innerHeight; } sizeCv(); addEventListener('resize',sizeCv);
 function burst(opts){
@@ -1187,6 +1209,10 @@ document.body.addEventListener('click', e=>{
 
 /* ================= CLOCK ================= */
 function tick(){
+  // Keep-alive: proactively resume the sound AudioContext the moment Chrome
+  // (or another browser) auto-suspends it for being idle too long, instead of
+  // waiting for the next sound effect to discover that and resume late.
+  if(AC && AC.state==='suspended'){ AC.resume().catch(()=>{}); }
   if(ROLE==='stage' || ROLE==='solo'){
     if(S && S.phase==='open' && S.deadline && !S.paused){
       const el = document.getElementById('stageTimer');
