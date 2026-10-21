@@ -320,12 +320,10 @@ textarea{width:100%;height:50vh;background:var(--panel2);color:var(--text);borde
   <div class="s-top">
     <div class="s-brand"><img class="logo" id="stageLogo" alt="Hekimler Yarışıyor"></div>
     <div class="eyebrow" id="stageProgress"></div>
-    <div class="eyebrow" id="stageConn"><span class="dot"></span> Bağlanıyor</div>
     <button class="fs-btn" id="stageFsBtn" onclick="toggleFullscreen()" title="Tam ekran" aria-label="Tam ekran">
       <svg class="fs-i-exp" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
       <svg class="fs-i-comp" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v4a1 1 0 0 1-1 1H4M15 3v4a1 1 0 0 0 1 1h4M9 21v-4a1 1 0 0 0-1-1H4M15 21v-4a1 1 0 0 1 1-1h4"/></svg>
     </button>
-    <button class="resetRoleBtn" onclick="resetRole()" title="Bu cihazın ekran seçimini sıfırla">Ekranı değiştir</button>
   </div>
   <div id="stageBody" style="flex:1;display:flex;flex-direction:column;min-height:0"></div>
 </div>
@@ -506,7 +504,7 @@ function defaultState(){
     screen:'setup',
     names:['Pati Ekibi','Kuyruk Ekibi'],
     emojis:['',''],
-    opts:{shuffle:true, penalty:false},
+    opts:{shuffle:false, penalty:false},
     bankText: DEFAULT_Q,
     part: 1,
     order:[], idx:-1,
@@ -930,7 +928,8 @@ function startGame(){
   if(!qs.length){ toast('Soru bulunamadı.'); return; }
   let order = partIndices(qs, G.part||1);
   if(!order.length) order = qs.map((_,i)=>i);
-  if(G.opts.shuffle) order = order.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+  // Sorular HER ZAMAN sunucu kartındaki sırayla gider — "karıştır" özelliği
+  // kafa karıştırmasın diye tamamen kaldırıldı, order asla random'a sokulmuyor.
   G.order=order; G.idx=-1; G.scores=[0,0]; G.screen='intro';
   controlRender(); push();
   clearTimeout(introTimer);
@@ -1046,7 +1045,6 @@ function controlSetupHtml(){
     ${G.names.map((n,i)=>`<div class="c-field"><b>${ROMAN[i]}</b><input type="text" maxlength="22" value="${esc(n)}" data-bind="name${i}"></div>
       <div class="emoji-pick">${TEAM_EMOJIS.map(em=>`<button class="emoji-opt ${(G.emojis&&G.emojis[i])===em?'on':''}" data-act="setEmoji" data-arg="${i}:${em}">${em}</button>`).join('')}</div>`).join('')}
     <div class="c-toggles">
-      <button class="chip ${G.opts.shuffle?'on':''}" data-act="toggleOpt" data-arg="shuffle">Sorular karışık</button>
       <button class="chip ${G.opts.penalty?'on':''}" data-act="toggleOpt" data-arg="penalty">Yanlışta puan kaybı</button>
     </div>
   </div>
